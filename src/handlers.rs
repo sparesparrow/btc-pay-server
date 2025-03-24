@@ -1,8 +1,9 @@
 
 use actix_web::{web, HttpResponse, Responder};
 use bitcoin::{Address, Network};
-use bitcoin::secp256k1::{Secp256k1, rand};
-use bitcoin::util::key::{PublicKey, PrivateKey};
+use bitcoin::secp256k1::Secp256k1;
+use bitcoin::key::{PublicKey, PrivateKey};
+use rand;
 use chrono::Utc;
 use log::info;
 use uuid::Uuid;

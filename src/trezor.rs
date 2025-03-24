@@ -1,5 +1,5 @@
 
-use log::{info, error};
+use log::info;
 use bitcoin::Transaction;
 
 pub struct TrezorClient {
@@ -12,7 +12,7 @@ impl TrezorClient {
         Self {}
     }
 
-    pub async fn sign_transaction(&self, unsigned_tx: &Transaction) -> Result<Transaction, String> {
+    pub async fn sign_transaction(&self, _unsigned_tx: &Transaction) -> Result<Transaction, String> {
         // In a real implementation, you would:
         // 1. Serialize the transaction for Trezor
         // 2. Send it to the Trezor device

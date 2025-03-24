@@ -1,6 +1,6 @@
 
 use reqwest::Client;
-use log::{info, error};
+use log::info;
 use bitcoin::Address;
 
 pub struct BlockchainClient {
