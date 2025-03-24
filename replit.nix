@@ -1,6 +1,8 @@
 
 { pkgs }: {
   deps = [
+    pkgs.hex
+    pkgs.bitcoin
     pkgs.rustc
     pkgs.cargo
     pkgs.rustfmt
