@@ -40,16 +40,7 @@ ring = "0.16"
 # Error handling
 thiserror = "1.0"
 anyhow = "1.0"
-mcp-attr = "0.0.4"
-rust-mcp-schema = "0.2.1"
-mcp-attr-macros = "0.0.4"
-mcp-ectors = "0.0.1"
-mcp-core = "0.1.42"
-trezorlib = "0.0.2"
-trezor-crypto-lib = "0.1.1"
-trezor-client = "0.1.4"
-trezor-crypto = "0.2.5"
-trezor-crypto-sys = "0.1.2"
-# Remove direct zeroize dependency to let Cargo resolve conflicts
-# Specific rustls version that's compatible with trezor dependencies
-rustls = "=0.21.0"
+# Removed conflicting dependencies
+# If needed, we can implement our own trezor interface instead of using these libraries
+# Or use a different hardware wallet library that doesn't have these conflicts
+zeroize = "1.3.0"
