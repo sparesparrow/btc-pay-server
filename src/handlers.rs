@@ -20,7 +20,10 @@ pub async fn create_invoice(
     // Generate a new Bitcoin address
     let secp = Secp256k1::new();
     let mut rng = rand::thread_rng();
-    let private_key = PrivateKey::new(&secp, &mut rng);
+    // Generate a secret key first
+    let secret_key = bitcoin::secp256k1::SecretKey::new(&mut rng);
+    // Create private key with the secret key and network
+    let private_key = PrivateKey::new(secret_key, Network::Testnet);
     let public_key = PublicKey::from_private_key(&secp, &private_key);
     let address = Address::p2pkh(&public_key, Network::Testnet);
 
