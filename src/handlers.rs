@@ -71,14 +71,36 @@ pub async fn check_payment_status(
     let mut invoices = data.invoices.lock().unwrap();
     
     if let Some(invoice) = invoices.get_mut(&invoice_id) {
-        // Simulate blockchain verification
-        let now = Utc::now();
-        if now > invoice.expires_at {
-            invoice.status = InvoiceStatus::Expired;
-            HttpResponse::Ok().json(invoice.clone())
-        } else {
-            HttpResponse::Ok().json(invoice.clone())
+        // Create blockchain client and check for transactions
+        let blockchain_client = crate::blockchain::BlockchainClient::new("https://mempool.space/api".to_string());
+        
+        // Parse the invoice address
+        match invoice.address.parse::<bitcoin::Address>() {
+            Ok(address) => {
+                // Check for transactions to this address
+                match blockchain_client.check_address_transactions(&address).await {
+                    Ok(has_transactions) => {
+                        if has_transactions {
+                            invoice.status = InvoiceStatus::Paid;
+                        } else {
+                            // Check for expiry
+                            let now = Utc::now();
+                            if now > invoice.expires_at {
+                                invoice.status = InvoiceStatus::Expired;
+                            }
+                        }
+                    },
+                    Err(e) => {
+                        log::error!("Error checking transactions: {}", e);
+                    }
+                }
+            },
+            Err(e) => {
+                log::error!("Error parsing address: {}", e);
+            }
         }
+        
+        HttpResponse::Ok().json(invoice.clone())
     } else {
         HttpResponse::NotFound().body("Invoice not found")
     }
@@ -87,4 +109,34 @@ pub async fn check_payment_status(
 pub async fn sign_transaction() -> impl Responder {
     // Trezor integration placeholder
     HttpResponse::Ok().body("Transaction signed with Trezor and broadcast")
+}
+pub async fn sign_transaction(
+    tx_data: web::Json<String>,
+    _data: web::Data<AppState>,
+) -> impl Responder {
+    // Parse the transaction hex
+    match bitcoin::Transaction::consensus_decode(&mut hex::decode(&tx_data).unwrap().as_slice()) {
+        Ok(unsigned_tx) => {
+            // Create Trezor client and sign transaction
+            let trezor_client = crate::trezor::TrezorClient::new();
+            
+            match trezor_client.sign_transaction(&unsigned_tx).await {
+                Ok(signed_tx) => {
+                    // Create blockchain client to broadcast the transaction
+                    let blockchain_client = crate::blockchain::BlockchainClient::new("https://mempool.space/api".to_string());
+                    
+                    // Serialize the signed transaction to hex
+                    let tx_hex = hex::encode(bitcoin::consensus::encode::serialize(&signed_tx));
+                    
+                    // Broadcast the transaction
+                    match blockchain_client.broadcast_transaction(&tx_hex).await {
+                        Ok(txid) => HttpResponse::Ok().json(txid),
+                        Err(e) => HttpResponse::InternalServerError().body(format!("Error broadcasting: {}", e))
+                    }
+                },
+                Err(e) => HttpResponse::InternalServerError().body(format!("Error signing: {}", e))
+            }
+        },
+        Err(e) => HttpResponse::BadRequest().body(format!("Invalid transaction: {}", e))
+    }
 }
