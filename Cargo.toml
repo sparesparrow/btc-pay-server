@@ -28,3 +28,5 @@ log = "0.4"
 chrono = { version = "0.4", features = ["serde"] }
 # For secure random number generation
 rand = "0.8.5"
+# Hex encoding/decoding
+hex = "0.4.3"

@@ -3,6 +3,7 @@ use actix_web::{web, HttpResponse, Responder};
 use bitcoin::{Address, Network};
 use bitcoin::secp256k1::Secp256k1;
 use bitcoin::key::{PublicKey, PrivateKey};
+use bitcoin::consensus::Decodable;
 use rand;
 use chrono::Utc;
 use log::info;
@@ -74,9 +75,12 @@ pub async fn check_payment_status(
         // Create blockchain client and check for transactions
         let blockchain_client = crate::blockchain::BlockchainClient::new("https://mempool.space/api".to_string());
         
-        // Parse the invoice address
-        match invoice.address.parse::<bitcoin::Address>() {
-            Ok(address) => {
+        // Parse the invoice address - use NetworkUnchecked for parsing
+        match bitcoin::Address::<bitcoin::address::NetworkUnchecked>::from_str(&invoice.address) {
+            Ok(unchecked_address) => {
+                // Convert to checked address with the appropriate network
+                let address = unchecked_address.require_network(Network::Testnet).unwrap();
+                
                 // Check for transactions to this address
                 match blockchain_client.check_address_transactions(&address).await {
                     Ok(has_transactions) => {
@@ -106,10 +110,6 @@ pub async fn check_payment_status(
     }
 }
 
-pub async fn sign_transaction() -> impl Responder {
-    // Trezor integration placeholder
-    HttpResponse::Ok().body("Transaction signed with Trezor and broadcast")
-}
 pub async fn sign_transaction(
     tx_data: web::Json<String>,
     _data: web::Data<AppState>,
