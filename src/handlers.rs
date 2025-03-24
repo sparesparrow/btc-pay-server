@@ -8,6 +8,7 @@ use rand;
 use chrono::Utc;
 use log::info;
 use uuid::Uuid;
+use std::str::FromStr;
 
 use crate::models::{Invoice, InvoiceStatus, PaymentRequest};
 use crate::state::AppState;
@@ -75,8 +76,8 @@ pub async fn check_payment_status(
         // Create blockchain client and check for transactions
         let blockchain_client = crate::blockchain::BlockchainClient::new("https://mempool.space/api".to_string());
         
-        // Parse the invoice address - use NetworkUnchecked for parsing
-        match bitcoin::Address::<bitcoin::address::NetworkUnchecked>::from_str(&invoice.address) {
+        // Parse the invoice address
+        match Address::from_str(&invoice.address) {
             Ok(unchecked_address) => {
                 // Convert to checked address with the appropriate network
                 let address = unchecked_address.require_network(Network::Testnet).unwrap();
@@ -114,8 +115,8 @@ pub async fn sign_transaction(
     tx_data: web::Json<String>,
     _data: web::Data<AppState>,
 ) -> impl Responder {
-    // Parse the transaction hex
-    match bitcoin::Transaction::consensus_decode(&mut hex::decode(&tx_data).unwrap().as_slice()) {
+    // Parse the transaction hex - extract the string from JSON first
+    match bitcoin::Transaction::consensus_decode(&mut hex::decode(&tx_data.into_inner()).unwrap().as_slice()) {
         Ok(unsigned_tx) => {
             // Create Trezor client and sign transaction
             let trezor_client = crate::trezor::TrezorClient::new();
