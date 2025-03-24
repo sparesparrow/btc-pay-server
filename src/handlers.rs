@@ -9,9 +9,22 @@ use chrono::Utc;
 use log::info;
 use uuid::Uuid;
 use std::str::FromStr;
+use serde::{Deserialize, Serialize};
 
 use crate::models::{Invoice, InvoiceStatus, PaymentRequest};
 use crate::state::AppState;
+use crate::auth;
+
+#[derive(Deserialize)]
+pub struct AuthRequest {
+    username: String,
+    password: String,
+}
+
+#[derive(Serialize)]
+pub struct TokenResponse {
+    token: String,
+}
 
 pub async fn create_invoice(
     payment_req: web::Json<PaymentRequest>,
@@ -104,6 +117,23 @@ pub async fn check_payment_status(
                 log::error!("Error parsing address: {}", e);
             }
         }
+
+pub async fn generate_token(
+    req: web::Json<AuthRequest>,
+    jwt_secret: web::Data<String>,
+) -> impl Responder {
+    // In a real application, validate credentials against a database
+    // This is a simplified example for demonstration
+    if req.username == "admin" && req.password == "secure_password" {
+        match auth::generate_token(&req.username, jwt_secret.get_ref().as_bytes()) {
+            Ok(token) => HttpResponse::Ok().json(TokenResponse { token }),
+            Err(_) => HttpResponse::InternalServerError().body("Could not generate token"),
+        }
+    } else {
+        HttpResponse::Unauthorized().body("Invalid credentials")
+    }
+}
+
         
         HttpResponse::Ok().json(invoice.clone())
     } else {

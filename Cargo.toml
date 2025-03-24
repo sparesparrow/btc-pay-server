@@ -18,7 +18,7 @@ rusqlite = { version = "0.29.0", features = ["bundled"] }
 # Async runtime
 tokio = { version = "1.28.2", features = ["full"] }
 # HTTP client for blockchain API
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", features = ["json", "rustls-tls"] }
 # UUID generation
 uuid = { version = "1.3.3", features = ["v4", "serde"] }
 # Logging
@@ -31,6 +31,15 @@ rand = "0.8.5"
 # Hex encoding/decoding
 hex = "0.4.3"
 jsonwebtoken = "9.3.1"
+# Rate limiting dependencies
+futures = "0.3"
+# Security-related dependencies
+hmac = "0.12"
+sha2 = "0.10"
+ring = "0.16"
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
 mcp-attr = "0.0.4"
 rust-mcp-schema = "0.2.1"
 mcp-attr-macros = "0.0.4"
