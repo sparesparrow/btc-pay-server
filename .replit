@@ -8,3 +8,24 @@ channel = "stable-24_05"
 
 [gitHubImport]
 requiredFiles = [".replit"]
+
+[workflows]
+runButton = "Run BTC Pay Server"
+
+[[workflows.workflow]]
+name = "Run BTC Pay Server"
+author = 40186242
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cargo run"
+
+[[workflows.workflow]]
+name = "Run Test Client"
+author = 40186242
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cargo run --bin client"
