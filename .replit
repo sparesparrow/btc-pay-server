@@ -29,3 +29,7 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "PKG_CONFIG_PATH=\"${PKG_CONFIG_PATH}:$(pkg-config --variable pc_path pkg-config)\" cargo run --bin client"
+
+[[ports]]
+localPort = 8080
+externalPort = 80
