@@ -50,5 +50,6 @@ trezor-crypto-lib = "0.1.1"
 trezor-client = "0.1.4"
 trezor-crypto = "0.2.5"
 trezor-crypto-sys = "0.1.2"
-zeroize = "1.7.0"
-rustls = "=0.22.0"
+# Remove direct zeroize dependency to let Cargo resolve conflicts
+# Specific rustls version that's compatible with trezor dependencies
+rustls = "=0.21.0"
