@@ -19,7 +19,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cargo run"
+args = "cargo run --bin btc-pay-server"
 
 [[workflows.workflow]]
 name = "Run Test Client"
